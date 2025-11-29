@@ -23,6 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import com.pal.datingapp.screen.FavoritesScreen
+import com.pal.datingapp.screen.HomeScreen
+import com.pal.datingapp.screen.ProfileScreen
 import com.pal.datingapp.ui.theme.DatingAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -61,10 +64,15 @@ fun DatingAppApp() {
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
+            /*Greeting(
                 name = "Android",
                 modifier = Modifier.padding(innerPadding)
-            )
+            )*/
+            when (currentDestination) {
+                AppDestinations.HOME -> HomeScreen(Modifier.padding(innerPadding))
+                AppDestinations.FAVORITES -> FavoritesScreen(Modifier.padding(innerPadding))
+                AppDestinations.PROFILE -> ProfileScreen(Modifier.padding(innerPadding))
+            }
         }
     }
 }

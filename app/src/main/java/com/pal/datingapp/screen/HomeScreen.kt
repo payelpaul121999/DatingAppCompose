@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,95 +42,75 @@ import coil.compose.AsyncImage
 import com.pal.datingapp.card.RightAlignedCircles
 import com.pal.datingapp.card.RightAlignedCirclesForBottom
 import com.pal.datingapp.data.ProfileCard
+import com.pal.datingapp.data.staticData.sampleProfiles
 import kotlinx.coroutines.launch
+
+
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
-    val sampleProfiles = listOf(
-        ProfileCard(
-            id = 1,
-            name = "Jessica Parker",
-            age = 23,
-            profession = "Professional Model",
-            imageUrl = "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e"
-        ),
-        ProfileCard(
-            id = 2,
-            name = "Priya Sharma",
-            age = 25,
-            profession = "Software Engineer",
-            imageUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde"
-        ),
-        ProfileCard(
-            id = 3,
-            name = "Ananya Rao",
-            age = 22,
-            profession = "Fashion Designer",
-            imageUrl = "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d"
-        ),
-        ProfileCard(
-            id = 4,
-            name = "Sara Wilson",
-            age = 27,
-            profession = "Content Creator",
-            imageUrl = "https://images.unsplash.com/photo-1494790108377-be9c29b29330"
-        ),
-        ProfileCard(
-            id = 5,
-            name = "Niharika Sen",
-            age = 24,
-            profession = "Medical Student",
-            imageUrl = "https://images.unsplash.com/photo-1524504388940-b1c1722653e1"
-        ),
-        ProfileCard(
-            id = 6,
-            name = "Emily Carter",
-            age = 26,
-            profession = "Marketing Manager",
-            imageUrl = "https://images.unsplash.com/photo-1554151228-14d9def656e4"
-        ),
-        ProfileCard(
-            id = 7,
-            name = "Ayesha Khan",
-            age = 23,
-            profession = "Dancer",
-            imageUrl = "https://images.unsplash.com/photo-1517841905240-472988babdf9"
+    Column() {
+        SwipeCardStack(
+            profiles = sampleProfiles,
+            onSwipeLeft = { println("Disliked: ${it.name}") },
+            onSwipeRight = { println("Liked: ${it.name}") }
         )
-    )
-    SwipeCardStack(
-        profiles = sampleProfiles,
-        onSwipeLeft = { println("Disliked: ${it.name}") },
-        onSwipeRight = { println("Liked: ${it.name}") }
-    )
+        RightAlignedCirclesForBottom(
+            onLeftClick = {
+                // Handle left circle click
+                Log.d("@@@MyScreen", "Left circle clicked")
+            },
+            onCenterClick = {
+                // Handle center circle click
+                Log.d("@@@MyScreen", "Center circle clicked")
+            },
+            onRightClick = {
+                // Handle right circle click
+                Log.d("@@@MyScreen", "Right circle clicked")
+            }
+        )
+    }
+
     //Text("Home Screen", modifier = modifier)
 }
 
 @Composable
 fun SwipeCardStack(
-    profiles: List<ProfileCard>,
+    profiles: MutableList<ProfileCard>,
     onSwipeLeft: (ProfileCard) -> Unit = {},
     onSwipeRight: (ProfileCard) -> Unit = {}
 ) {
     var cardList by remember { mutableStateOf(profiles) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier) {
         cardList.take(3).reversed().forEachIndexed { index, card ->
             SwipeableCardReuse(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier,
                 card = card,
                 onSwiped = { direction ->
-                    cardList = cardList.minus(card)
+                    if (cardList.isNotEmpty()) {
 
-                    if (direction == SwipeDirection.RIGHT)
-                        onSwipeRight(card)
-                    else
-                        onSwipeLeft(card)
+                        // Map reversed index to actual list index
+                        val actualIndex = cardList.lastIndex - index
+
+                        val removedCard = cardList[actualIndex]
+
+                        cardList = cardList.toMutableList().apply {
+                            removeAt(actualIndex)
+                        }
+
+                        if (direction == SwipeDirection.RIGHT)
+                            onSwipeRight(removedCard)
+                        else
+                            onSwipeLeft(removedCard)
+                    }
                 },
                 isTopCard = index == 0
             )
         }
     }
 }
+
 enum class SwipeDirection { LEFT, RIGHT, NONE }
 
 @Composable
@@ -175,6 +156,7 @@ fun SwipeableCardReuse(
                                     offsetY.snapTo(0f)
                                 }
                             }
+
                             offsetX.value < -swipeThreshold -> {
                                 scope.launch {
                                     offsetX.animateTo(
@@ -186,10 +168,14 @@ fun SwipeableCardReuse(
                                     offsetY.snapTo(0f)
                                 }
                             }
+
                             else -> {
                                 // not enough: spring back to center
                                 scope.launch {
-                                    offsetX.animateTo(0f, animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                                    offsetX.animateTo(
+                                        0f,
+                                        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                                    )
                                     offsetY.animateTo(0f, animationSpec = spring())
                                 }
                             }
@@ -209,21 +195,6 @@ fun SwipeableCardReuse(
     ) {
         Column() {
             ProfileCardUI(card)
-            RightAlignedCirclesForBottom(
-                onLeftClick = {
-                    // Handle left circle click
-                    Log.d("@@@MyScreen", "Left circle clicked")
-                },
-                onCenterClick = {
-                    // Handle center circle click
-                    Log.d("@@@MyScreen", "Center circle clicked")
-                },
-                onRightClick = {
-                    // Handle right circle click
-                    Log.d("@@@MyScreen", "Right circle clicked")
-                }
-            )
-
         }
     }
 }
@@ -238,7 +209,6 @@ fun ProfileCardUI(card: ProfileCard) {
             .shadow(16.dp, RoundedCornerShape(28.dp))
     ) {
         Column {
-            Spacer(modifier = Modifier.height(20.dp))
             AsyncImage(
                 model = card.imageUrl,
                 contentDescription = null,
@@ -250,10 +220,18 @@ fun ProfileCardUI(card: ProfileCard) {
             )
         }
 
-        Column(modifier = Modifier.padding(16.dp).align(Alignment.BottomStart)) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .align(Alignment.BottomStart)) {
             RightAlignedCircles()
-            Text("${card.name}, ${card.age}", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text(card.profession, fontSize = 16.sp, color = Color.Gray)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Column( Modifier.fillMaxWidth()
+                    .background(Color.Black.copy(alpha = 0.25f))) {
+                    Text("${card.name}, ${card.age}", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(card.profession, fontSize = 16.sp, color = Color.White)
+                }
+            }
+
         }
     }
 }

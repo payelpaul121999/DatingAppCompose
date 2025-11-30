@@ -48,11 +48,11 @@ fun RightAlignedCirclesForBottom( onLeftClick: (() -> Unit)? = null,onCenterClic
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CircleWithIcon(iconRes = R.drawable.presence_video_online,40.dp,24.dp){
+        CircleWithIcon(iconRes = R.drawable.ic_input_delete,40.dp,24.dp){
             onLeftClick?.invoke()
         }
         Spacer(modifier = Modifier.width(8.dp))
-        CircleWithIcon(iconRes = R.drawable.ic_menu_view,50.dp,24.dp){
+        CircleWithIcon(iconRes = R.drawable.stat_notify_chat,50.dp,24.dp){
             onCenterClick?.invoke()
         }
         Spacer(modifier = Modifier.width(8.dp))
